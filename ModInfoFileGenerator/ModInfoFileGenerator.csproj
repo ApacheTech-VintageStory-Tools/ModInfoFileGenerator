@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0</TargetFramework>
-		<AssemblyName>ModInfoFileGenerator</AssemblyName>
+		<TargetFramework>net7.0</TargetFramework>
+		<AssemblyName>mig</AssemblyName>
 		<RootNamespace>ModInfoFileGenerator</RootNamespace>
 	</PropertyGroup>
 
@@ -21,11 +21,11 @@
 
 	<ItemGroup>
 		<Reference Include="VintagestoryAPI">
-			<HintPath>D:\Games\Vintage Story\VintagestoryAPI.dll</HintPath>
+			<HintPath>$(VINTAGE_STORY)\VintagestoryAPI.dll</HintPath>
 			<Private>true</Private>
 		</Reference>
 		<Reference Include="VintagestoryLib">
-			<HintPath>D:\Games\Vintage Story\VintagestoryLib.dll</HintPath>
+			<HintPath>$(VINTAGE_STORY)\VintagestoryLib.dll</HintPath>
 			<Private>true</Private>
 		</Reference>
 	</ItemGroup>
