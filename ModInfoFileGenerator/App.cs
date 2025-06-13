@@ -36,10 +36,11 @@ namespace ModInfoFileGenerator
             if (!assemblyFile.Extension.Equals(".dll"))
                 throw new DllNotFoundException("The selected file is not a .dll file.");
 
+            var outDir = option.TargetDir ?? assemblyFile.DirectoryName!;
             var assembly = Assembly.LoadFile(assemblyFile.FullName);
             var modInfo = assembly.PopulateJsonDto(option.VersionType);
             var json = JsonConvert.SerializeObject(modInfo, Formatting.Indented);
-            await File.WriteAllTextAsync(Path.Combine(assemblyFile.DirectoryName!, "modinfo.json"), json);
+            await File.WriteAllTextAsync(Path.Combine(outDir, "modinfo.json"), json);
         }
     }
 }
