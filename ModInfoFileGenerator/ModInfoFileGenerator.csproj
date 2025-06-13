@@ -20,6 +20,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="$(ProjectName).Tests"/>
+	</ItemGroup>
+
+	<ItemGroup>
 		<Reference Include="VintagestoryAPI">
 			<HintPath>$(VINTAGE_STORY)\VintagestoryAPI.dll</HintPath>
 			<Private>true</Private>
