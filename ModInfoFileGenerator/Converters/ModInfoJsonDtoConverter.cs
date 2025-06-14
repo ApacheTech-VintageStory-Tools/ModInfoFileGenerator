@@ -14,8 +14,8 @@ internal static class ModInfoJsonDtoConverter
     /// <exception cref="CustomAttributeFormatException">No ModInfoAttribute found in assembly.</exception>
     internal static ModInfoJsonDto PopulateJsonDto(this Assembly assembly, string versionType)
     {
-        var modInfo = ExtractModFileInfo(assembly);
-        if (modInfo == null) throw new CustomAttributeFormatException("No ModInfoAttribute found in assembly.");
+        var modInfo = ExtractModFileInfo(assembly) 
+            ?? throw new CustomAttributeFormatException("No ModInfoAttribute found in assembly.");
         var dependencies = assembly.FindAllModDependencies();
         var version = versionType == "static" 
             ? modInfo.Version 
@@ -86,11 +86,10 @@ internal static class ModInfoJsonDtoConverter
     /// </summary>
     /// <param name="assembly">The mod assembly to scan.</param>
     /// <returns>A <see cref="List{ModDependency}"/> populated with any dependent mods, for the specified assembly.</returns>
-    private static List<ModDependency> FindAllModDependencies(this Assembly assembly)
-    {
-        return assembly
+    private static List<ModDependency> FindAllModDependencies(this Assembly assembly) => 
+    [
+        .. assembly
             .GetCustomAttributes<ModDependencyAttribute>()
             .Select(p => new ModDependency(p.ModID, p.Version))
-            .ToList();
-    }
+    ];
 }
