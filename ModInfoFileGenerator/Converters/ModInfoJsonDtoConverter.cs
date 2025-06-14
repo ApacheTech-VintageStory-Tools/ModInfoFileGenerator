@@ -47,33 +47,35 @@ internal static class ModInfoJsonDtoConverter
     /// <summary>
     ///     Converts a vanilla  <see cref="ModInfoAttribute"/> to a <see cref="ModInfoJsonDto"/>, ready for serialisation.
     /// </summary>
-    /// <param name="modInfo">The mod information from the mod assembly.</param>
+    /// <param name="modInfoAttribute">The mod information from the mod assembly.</param>
     /// <param name="version">The mod version to add to the DTO.</param>
     /// <param name="dependencies">A list of any specified mod dependencies, to add to the DTO.</param>
     /// <returns></returns>
     /// <exception cref="ArgumentException">Cannot parse '{modInfo.Side}', must be either 'Client', 'Server' or 'Universal'. Defaulting to 'Universal'.</exception>
-    private static ModInfoJsonDto ToDto(this ModInfoAttribute modInfo, string version,
+    private static ModInfoJsonDto ToDto(this ModInfoAttribute modInfoAttribute, string version,
         IReadOnlyList<ModDependency> dependencies)
     {
-        if (!Enum.TryParse(modInfo.Side, true, out EnumAppSide side))
+        if (!Enum.TryParse(modInfoAttribute.Side, true, out EnumAppSide side))
             throw new ArgumentException(
-                $"Cannot parse '{modInfo.Side}', must be either 'Client', 'Server' or 'Universal'. Defaulting to 'Universal'.");
+                $"Cannot parse '{modInfoAttribute.Side}', must be either 'Client', 'Server' or 'Universal'. Defaulting to 'Universal'.");
+
+        var schemaUrl = "https://mods.vintagestory.at/web/schema/modinfo.v2.rc1.json";
 
         var dto = new ModInfoJsonDto
         {
+            Schema = schemaUrl,
             Type = "Code",
-            Name = modInfo.Name,
-            ModId = modInfo.ModID,
-            Side = modInfo.Side,
-            Description = modInfo.Description,
+            Name = modInfoAttribute.Name,
+            ModId = modInfoAttribute.ModID,
+            Side = modInfoAttribute.Side,
+            Description = modInfoAttribute.Description,
             Version = version,
-            Authors = modInfo.Authors,
-            Contributors = modInfo.Contributors,
-            NetworkVersion = modInfo.NetworkVersion,
-            RequiredOnClient = modInfo.RequiredOnClient,
-            RequiredOnServer = modInfo.RequiredOnServer,
-            WorldConfig = modInfo.WorldConfig,
-            Website = modInfo.Website,
+            Authors = modInfoAttribute.Authors,
+            Contributors = modInfoAttribute.Contributors,
+            NetworkVersion = modInfoAttribute.NetworkVersion,
+            RequiredOnClient = modInfoAttribute.RequiredOnClient && side is not EnumAppSide.Server,
+            RequiredOnServer = modInfoAttribute.RequiredOnServer && side is not EnumAppSide.Client,
+            Website = modInfoAttribute.Website,
             Dependencies = dependencies
         };
         return dto;
