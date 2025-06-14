@@ -13,7 +13,7 @@ public record ModInfoJsonDto
     public required string Schema { get; init; }
 
     /// <summary>
-    ///     The type of the mod (e.g., "mod", "coremod").
+    ///     The type of the mod (e.g., "Code", "Content", or "Theme").
     /// </summary>
     [JsonProperty("type", Required = Required.Always)]
     public required string Type { get; init; }
