@@ -15,6 +15,7 @@ global using ModInfoFileGenerator;
 global using ModInfoFileGenerator.Model;
 global using ModInfoFileGenerator.Converters;
 
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using Microsoft.Extensions.Logging;
 global using Serilog;

@@ -1,25 +1,38 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace ModInfoFileGenerator;
+﻿namespace ModInfoFileGenerator;
 
 /// <summary>
 ///     The main application entry point for the mod info file generator.
 ///     Handles command line parsing and coordinates the conversion process.
 /// </summary>
-public class App
+/// <remarks>
+///     Initialises a new instance of the <see cref="App"/> class.
+/// </remarks>
+/// <param name="modInfoJsonDtoConverter">The converter service for mod info DTOs.</param>
+/// <param name="logger">The logger for application events.</param>
+public class App(IModInfoJsonDtoConverter modInfoJsonDtoConverter, ILogger<App> logger)
 {
-    private readonly IModInfoJsonDtoConverter _modInfoJsonDtoConverter;
-    private readonly ILogger<App> _logger;
+    private readonly IModInfoJsonDtoConverter _modInfoJsonDtoConverter = modInfoJsonDtoConverter;
+    private readonly ILogger<App> _logger = logger;
 
     /// <summary>
-    ///     Initialises a new instance of the <see cref="App"/> class.
+    ///     Creates a new host for the application with the specified command line arguments.
     /// </summary>
-    /// <param name="modInfoJsonDtoConverter">The converter service for mod info DTOs.</param>
-    /// <param name="logger">The logger for application events.</param>
-    public App(IModInfoJsonDtoConverter modInfoJsonDtoConverter, ILogger<App> logger)
+    /// <param name="args">The command line arguments passed to the application.</param>
+    /// <returns>The configured <see cref="IHost"/> instance ready to run the application.</returns>
+    public static IHost CreateHost(string[] args)
     {
-        _modInfoJsonDtoConverter = modInfoJsonDtoConverter;
-        _logger = logger;
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateLogger();
+
+        return Host.CreateDefaultBuilder(args)
+            .UseSerilog()
+            .ConfigureServices((context, services) =>
+            {
+                services.AddSingleton<IModInfoJsonDtoConverter, ModInfoJsonDtoConverter>();
+                services.AddSingleton<App>();
+            })
+            .Build();
     }
 
     /// <summary>

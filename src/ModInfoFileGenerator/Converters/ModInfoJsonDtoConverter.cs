@@ -1,23 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace ModInfoFileGenerator.Converters;
+﻿namespace ModInfoFileGenerator.Converters;
 
 /// <summary>
 ///     Converts <see cref="ModInfoAttribute"/> from a given assembly, to a <see cref="ModInfoJsonDto"/>, ready to be processed.
 ///     This service is used for extracting and converting mod metadata for output as JSON.
 /// </summary>
-public class ModInfoJsonDtoConverter : IModInfoJsonDtoConverter
+/// <remarks>
+///     Initialises a new instance of the <see cref="ModInfoJsonDtoConverter"/> class.
+/// </remarks>
+/// <param name="logger">The logger to use for trace output.</param>
+public class ModInfoJsonDtoConverter(ILogger<ModInfoJsonDtoConverter> logger) : IModInfoJsonDtoConverter
 {
-    private readonly ILogger<ModInfoJsonDtoConverter> _logger;
-
-    /// <summary>
-    ///     Initialises a new instance of the <see cref="ModInfoJsonDtoConverter"/> class.
-    /// </summary>
-    /// <param name="logger">The logger to use for trace output.</param>
-    public ModInfoJsonDtoConverter(ILogger<ModInfoJsonDtoConverter> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<ModInfoJsonDtoConverter> _logger = logger;
 
     /// <summary>
     ///     Populates a DTO object with information from a given assembly.
