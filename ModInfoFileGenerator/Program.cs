@@ -25,7 +25,7 @@ static async Task RunAsync(PackagerCommandLineArgs option)
 
     var outDir = option.TargetDir ?? assemblyFile.DirectoryName!;
     var assembly = Assembly.LoadFile(assemblyFile.FullName);
-    var modInfo = assembly.PopulateJsonDto(option.VersionType);
+    var modInfo = assembly.PopulateJsonDto(option);
     var json = JsonConvert.SerializeObject(modInfo, Formatting.Indented);
     await File.WriteAllTextAsync(Path.Combine(outDir, "modinfo.json"), json);
 }

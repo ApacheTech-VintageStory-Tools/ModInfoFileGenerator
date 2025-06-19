@@ -32,4 +32,13 @@ public sealed class PackagerCommandLineArgs
         MetaValue = "static|assembly",
         HelpText = "The target version. [static] will take the version from the ModInfoAttribute. [assembly] will use the version of the assembly itself.")]
     public string VersionType { get; set; }
+
+    /// <summary>
+    ///     The URL of the JSON schema to use for the mod info file.
+    /// </summary>
+    [Option('s', "schema",
+        Required = false,
+        Default = "https://mods.vintagestory.at/web/schema/modinfo.v2.rc3.json",
+        HelpText = "The JSON schema URL to use for the mod info file.")]
+    public string SchemaUrl { get; set; }
 }
