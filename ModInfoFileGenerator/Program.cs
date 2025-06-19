@@ -1,31 +1,31 @@
-﻿try
+﻿using Serilog;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using ModInfoFileGenerator.Converters;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateLogger();
+
+/// <summary>
+///     The main entry point for the mod info file generator application.
+///     Configures the host, logging, and dependency injection container.
+/// </summary>
+try
 {
-    await Parser.Default
-        .ParseArguments<PackagerCommandLineArgs>(args)
-        .WithParsedAsync(RunAsync);
-    Console.WriteLine("Process Complete: modinfo.json file has been created.");
+    var host = Host.CreateDefaultBuilder(args)
+        .UseSerilog()
+        .ConfigureServices((context, services) =>
+        {
+            services.AddSingleton<IModInfoJsonDtoConverter, ModInfoJsonDtoConverter>();
+            services.AddSingleton<App>();
+        })
+        .Build();
+
+    var app = host.Services.GetRequiredService<App>();
+    await app.RunAsync(args);
 }
-catch (Exception e)
+finally
 {
-    Console.WriteLine($"{e.GetType()}: {e.Message}");
-}
-
-static async Task RunAsync(PackagerCommandLineArgs option)
-{
-    if (!Path.IsPathRooted(option.TargetPath))
-        option.TargetPath = Path.Combine(Environment.CurrentDirectory, option.TargetPath);
-
-    var assemblyFile = new FileInfo(option.TargetPath);
-
-    if (!assemblyFile.Exists)
-        throw new FileNotFoundException("No file was found at the given location.", option.TargetPath);
-
-    if (!assemblyFile.Extension.Equals(".dll"))
-        throw new DllNotFoundException("The selected file is not a .dll file.");
-
-    var outDir = option.TargetDir ?? assemblyFile.DirectoryName!;
-    var assembly = Assembly.LoadFile(assemblyFile.FullName);
-    var modInfo = assembly.PopulateJsonDto(option);
-    var json = JsonConvert.SerializeObject(modInfo, Formatting.Indented);
-    await File.WriteAllTextAsync(Path.Combine(outDir, "modinfo.json"), json);
+    Log.CloseAndFlush();
 }

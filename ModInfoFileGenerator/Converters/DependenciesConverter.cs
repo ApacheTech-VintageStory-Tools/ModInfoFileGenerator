@@ -2,6 +2,7 @@
 
 /// <summary>
 ///     Ripped straight from the game, this converter helps to serialise and deserialise mod dependencies.
+///     Used for converting between JSON and <see cref="ModDependency"/> objects in mod info files.
 /// </summary>
 /// <seealso cref="JsonConverter" />
 public class DependenciesConverter : JsonConverter
@@ -11,7 +12,7 @@ public class DependenciesConverter : JsonConverter
     /// </summary>
     /// <param name="objectType">Type of the object.</param>
     /// <returns>
-    /// <c>true</c> if this instance can convert the specified object type; otherwise, <c>false</c>.
+    ///     <c>true</c> if this instance can convert the specified object type; otherwise, <c>false</c>.
     /// </returns>
     public override bool CanConvert(Type objectType)
     {
@@ -26,7 +27,7 @@ public class DependenciesConverter : JsonConverter
     /// <param name="existingValue">The existing value of object being read.</param>
     /// <param name="serializer">The calling serializer.</param>
     /// <returns>
-    /// The object value.
+    ///     The object value.
     /// </returns>
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
         JsonSerializer serializer)

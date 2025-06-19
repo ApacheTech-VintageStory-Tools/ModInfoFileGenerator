@@ -1,23 +1,41 @@
-﻿namespace ModInfoFileGenerator.Converters;
+﻿using Microsoft.Extensions.Logging;
+
+namespace ModInfoFileGenerator.Converters;
 
 /// <summary>
 ///     Converts <see cref="ModInfoAttribute"/> from a given assembly, to a <see cref="ModInfoJsonDto"/>, ready to be processed.
+///     This service is used for extracting and converting mod metadata for output as JSON.
 /// </summary>
-internal static class ModInfoJsonDtoConverter
+public class ModInfoJsonDtoConverter : IModInfoJsonDtoConverter
 {
+    private readonly ILogger<ModInfoJsonDtoConverter> _logger;
+
+    /// <summary>
+    ///     Initialises a new instance of the <see cref="ModInfoJsonDtoConverter"/> class.
+    /// </summary>
+    /// <param name="logger">The logger to use for trace output.</param>
+    public ModInfoJsonDtoConverter(ILogger<ModInfoJsonDtoConverter> logger)
+    {
+        _logger = logger;
+    }
+
     /// <summary>
     ///     Populates a DTO object with information from a given assembly.
     /// </summary>
     /// <param name="assembly">The assembly.</param>
     /// <param name="options">The parsed args passed in by the user.</param>
-    /// <returns></returns>
+    /// <returns>A populated <see cref="ModInfoJsonDto"/>.</returns>
     /// <exception cref="CustomAttributeFormatException">No ModInfoAttribute found in assembly.</exception>
-    internal static ModInfoJsonDto PopulateJsonDto(this Assembly assembly, PackagerCommandLineArgs options)
+    public ModInfoJsonDto PopulateJsonDto(Assembly assembly, PackagerCommandLineArgs options)
     {
-        var modInfoAttribute = ExtractModFileInfo(assembly) 
-            ?? throw new CustomAttributeFormatException("No ModInfoAttribute found in assembly."); var side = ParseAppSideOrThrow(modInfoAttribute.Side);
+        _logger.LogInformation("Populating ModInfoJsonDto for assembly: {AssemblyLocation}", assembly.Location);
+        var modInfoAttribute = ExtractModFileInfo(assembly)
+            ?? throw new CustomAttributeFormatException("No ModInfoAttribute found in assembly.");
+        _logger.LogInformation("ModInfoAttribute found: {ModId}", modInfoAttribute.ModID);
+        var side = ParseAppSideOrThrow(modInfoAttribute.Side);
         var version = ResolveVersion(modInfoAttribute, assembly, options);
-        var dependencies = assembly.FindAllModDependencies();
+        var dependencies = FindAllModDependencies(assembly);
+        _logger.LogInformation("Dependencies found: {DependencyCount}", dependencies.Count);
         return new ModInfoJsonDto
         {
             Schema = options.SchemaUrl,
@@ -42,10 +60,11 @@ internal static class ModInfoJsonDtoConverter
     /// </summary>
     /// <param name="assembly">The assembly.</param>
     /// <returns>An instance of <see cref="ModInfoAttribute"/> populated with information from the assembly.</returns>
-    private static ModInfoAttribute ExtractModFileInfo(Assembly assembly)
+    private ModInfoAttribute ExtractModFileInfo(Assembly assembly)
     {
         try
         {
+            _logger.LogInformation("Extracting ModInfoAttribute from assembly: {AssemblyLocation}", assembly.Location);
             return assembly.GetCustomAttribute<ModInfoAttribute>();
         }
         catch (FileNotFoundException e)
@@ -53,26 +72,39 @@ internal static class ModInfoJsonDtoConverter
             var fileName = e.FileName!.Split(',')[0];
             var directory = Path.GetDirectoryName(assembly.Location);
             var filePath = Path.Combine(directory!, $"{fileName}.dll");
+            _logger.LogInformation("Loading missing dependency: {FilePath}", filePath);
             Assembly.LoadFrom(filePath);
             return ExtractModFileInfo(assembly);
         }
     }
 
     /// <summary>
-    ///     Parses the mod side string to EnumAppSide or throws if invalid.
+    ///     Parses the mod side string to <see cref="EnumAppSide"/> or throws if invalid.
     /// </summary>
-    private static EnumAppSide ParseAppSideOrThrow(string sideString)
+    /// <param name="sideString">The side string to parse.</param>
+    /// <returns>The parsed <see cref="EnumAppSide"/> value.</returns>
+    /// <exception cref="ArgumentException">Thrown if the side string is invalid.</exception>
+    private EnumAppSide ParseAppSideOrThrow(string sideString)
     {
+        _logger.LogInformation("Parsing mod side: {SideString}", sideString);
         if (!Enum.TryParse(sideString, true, out EnumAppSide side))
-            throw new ArgumentException($"Cannot parse '{sideString}', must be either 'Client', 'Server' or 'Universal'. Defaulting to 'Universal'.");
+        {
+            _logger.LogError("Invalid mod side: {SideString}", sideString);
+            throw new ArgumentException($"Cannot parse '{sideString}', must be either 'Client', 'Server' or 'Universal'.");
+        }
         return side;
     }
 
     /// <summary>
     ///     Resolves the version string based on options.
     /// </summary>
-    private static string ResolveVersion(ModInfoAttribute modInfoAttribute, Assembly assembly, PackagerCommandLineArgs options)
+    /// <param name="modInfoAttribute">The mod info attribute.</param>
+    /// <param name="assembly">The assembly.</param>
+    /// <param name="options">The parsed command line arguments.</param>
+    /// <returns>The resolved version string.</returns>
+    private string ResolveVersion(ModInfoAttribute modInfoAttribute, Assembly assembly, PackagerCommandLineArgs options)
     {
+        _logger.LogInformation("Resolving version for mod: {ModId}, VersionType: {VersionType}", modInfoAttribute.ModID, options.VersionType);
         return options.VersionType == "static"
             ? modInfoAttribute.Version
             : FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion!;
@@ -83,10 +115,13 @@ internal static class ModInfoJsonDtoConverter
     /// </summary>
     /// <param name="assembly">The mod assembly to scan.</param>
     /// <returns>A <see cref="List{ModDependency}"/> populated with any dependent mods, for the specified assembly.</returns>
-    private static List<ModDependency> FindAllModDependencies(this Assembly assembly) => 
-    [
-        .. assembly
+    private List<ModDependency> FindAllModDependencies(Assembly assembly)
+    {
+        var dependencies = assembly
             .GetCustomAttributes<ModDependencyAttribute>()
             .Select(p => new ModDependency(p.ModID, p.Version))
-    ];
+            .ToList();
+        _logger.LogInformation("Found {Count} mod dependencies.", dependencies.Count);
+        return dependencies;
+    }
 }

@@ -1,7 +1,8 @@
 ﻿namespace ModInfoFileGenerator.Model;
 
 /// <summary>
-///    Represents the ModInfo for the mod.
+///     Represents the ModInfo for the mod.
+///     This record is serialised to and from modinfo.json files.
 /// </summary>
 [JsonObject]
 public record ModInfoJsonDto
@@ -83,6 +84,7 @@ public record ModInfoJsonDto
     /// </summary>
     [JsonProperty("networkVersion", NullValueHandling = NullValueHandling.Ignore)]
     public string NetworkVersion { get; init; }
+
     /// <summary>
     ///     The list of dependencies required by the mod.
     /// </summary>
