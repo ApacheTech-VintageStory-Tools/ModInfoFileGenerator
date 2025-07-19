@@ -12,7 +12,6 @@
 		<GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
-		<DocumentationFile></DocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

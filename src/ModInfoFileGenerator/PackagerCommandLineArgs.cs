@@ -13,12 +13,13 @@ public sealed class PackagerCommandLineArgs
         Required = true,
         MetaValue = "$(TargetPath)",
         HelpText = "The target assembly. In most cases, should be $(TargetPath) in MSBuild Macros.")]
-    public string TargetPath { get; set; }
+    public required string TargetPath { get; set; }
 
     /// <summary>
     ///     The output directory for the generated modinfo.json file. In most cases, this should be $(TargetDir) in MSBuild Macros.
     /// </summary>
     [Option('o', "outdir",
+        Required = false,
         MetaValue = "$(TargetDir)",
         HelpText = "The output directory. In most cases, should be $(TargetDir) in MSBuild Macros.")]
     public string TargetDir { get; set; }
@@ -31,7 +32,7 @@ public sealed class PackagerCommandLineArgs
         Default = "static",
         MetaValue = "static|assembly",
         HelpText = "The target version. [static] will take the version from the ModInfoAttribute. [assembly] will use the version of the assembly itself.")]
-    public string VersionType { get; set; }
+    public string VersionType { get; set; } = "static";
 
     /// <summary>
     ///     The URL of the JSON schema to use for the mod info file.
@@ -40,5 +41,5 @@ public sealed class PackagerCommandLineArgs
         Required = false,
         Default = "https://mods.vintagestory.at/web/schema/modinfo.v2.rc3.json",
         HelpText = "The JSON schema URL to use for the mod info file.")]
-    public string SchemaUrl { get; set; }
+    public string SchemaUrl { get; set; } = "https://mods.vintagestory.at/web/schema/modinfo.v2.rc3.json";
 }
