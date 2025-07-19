@@ -4,9 +4,7 @@
 /// </summary>
 try
 {
-    var host = App.CreateHost(args);
-    var app = host.Services.GetRequiredService<App>();
-    await app.RunAsync(args);
+    await App.RunAsync(args);
 }
 finally
 {
